@@ -1,0 +1,10 @@
+# python stuff
+__pycache__/
+venv/
+*.egg-info
+
+# sensitive data
+*.db
+
+# ide
+.vscode/

@@ -1,0 +1,8 @@
+rich==13.7.1
+pwinput==1.0.3
+readchar==4.0.6
+pyperclip==1.8.2
+pyfiglet==1.0.2
+pycryptodome==3.20.0
+argon2-cffi==23.1.0
+pandas==2.2.2
