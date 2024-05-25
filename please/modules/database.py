@@ -17,10 +17,10 @@ class Database:
         self.create_table(self.pass_table, ["id INTEGER PRIMARY KEY AUTOINCREMENT",
                                              "username TEXT NOT NULL",
                                              "password TEXT NOT NULL",
-                                             "platform TEXT NOT NULL",
+                                             "description TEXT NOT NULL",
                                              "username_salt TEXT",
                                              "password_salt TEXT",
-                                             "platform_salt TEXT"])
+                                             "description_salt TEXT"])
 
 
     def create_table(self, table_name: str, cols: list[str]) -> None:
@@ -37,7 +37,7 @@ class Database:
         if table_name == self.mp_table:
             fields = "(hash)"
         elif table_name == self.pass_table:
-            fields = "(username, password, platform, username_salt, password_salt, platform_salt)"
+            fields = "(username, password, description, username_salt, password_salt, description_salt)"
 
         query = f"""
             INSERT INTO {table_name} {fields}

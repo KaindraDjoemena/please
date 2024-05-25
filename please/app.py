@@ -96,19 +96,6 @@ class App:
         return
 
 
-    def derivate_enc_keys(self, limit, offset):
-        db2 = Database(
-            db_name = self.db_name,
-            pass_table=self.pass_table,
-            mp_table=self.mp_table
-        )
-        for entry in db2.get_entry(self.pass_table, limit=limit, offset=offset):
-            for i in range(4):
-                if i == 0:
-                    continue
-                self.aes.derive_key(self.mp, entry[i+3]).decode("utf-8")
-        db2.close_connection()
-
     def user_signin(self) -> bool:
         '''SIGN IN'''
 
@@ -125,9 +112,6 @@ class App:
 
                 Argon2Hasher.verify_password(hash, mp_input)
                 self.mp = mp_input
-
-                # key_derivation_thread = threading.Thread(target=self.derivate_enc_keys)
-                # key_derivation_thread.start()
 
             # load entries for quick operations
             with self.console.status("[notif]fetching entries...[/]"):
@@ -159,17 +143,13 @@ class App:
                 # rendering
                 self.render_title_card()                                                    # render title card
                 self.console.print(format_options(OPTIONS, cur_loc))                        # render options
-                self.console.print("[c]onfigurations [q]uit", markup=False, style="info")   # render help
+                self.console.print("[q]uit", markup=False, style="info")   # render help
 
                 user_input = readkey()
 
                 # exit program
                 if user_input.lower() == "q":
                     exit()
-
-                # TODO: make configuration page
-                if user_input.lower() == "c":
-                    pass
                 
                 # cursor navigation
                 if (user_input == key.DOWN or user_input.lower() == "j") and cur_loc < len(OPTIONS) - 1:
@@ -198,7 +178,7 @@ class App:
         table.add_column("ID")
         table.add_column("USERNAME")
         table.add_column("PASSWORD")
-        table.add_column("PLATFORM")
+        table.add_column("DESCRIPTION")
 
         # add rows
         row_count = 0
@@ -219,7 +199,7 @@ class App:
                     str(row["ID"]),
                     row["USERNAME"],
                     password_cell,
-                    row["PLATFORM"],
+                    row["DESCRIPTION"],
                     style=style
                 )
 
@@ -319,13 +299,13 @@ class App:
         self.console.show_cursor(True)
         username_input = Prompt.ask("username", default="username", show_default=True)
         password_input = Prompt.ask("password", default=gen_pass(), show_default=True)
-        platform_input = Prompt.ask("platform", default="", show_default=False)
+        description_input = Prompt.ask("description", default="", show_default=False)
         self.console.show_cursor(False)
 
         input_fields = [
             username_input,
             password_input,
-            platform_input
+            description_input
         ]
 
         encrypted_fields = []
@@ -361,7 +341,7 @@ class App:
         OPTIONS = [
             ("id", lambda: IntPrompt.ask(">> id")),
             ("username", lambda: Prompt.ask(">> username")),
-            ("platform", lambda: Prompt.ask(">> platform"))
+            ("description", lambda: Prompt.ask(">> description"))
         ]
 
         cur_loc = 0 # cursor location (index of the options list)
@@ -409,7 +389,7 @@ class App:
                 while True:
                     self.console.clear()
                     self.render_page_header("DELETION PREVIEW")
-                    self.console.print("[ESC] - back | [ENTER] - proceed", style="info")
+                    self.console.print("[b]ack | [ENTER] - proceed", style="info")
                     self.render_table(filtered_table,
                                     cur_loc=-1,
                                     page_size=page_size,
@@ -466,7 +446,7 @@ class App:
         OPTIONS = [
             ("id", lambda: IntPrompt.ask(">> id")),
             ("username", lambda: Prompt.ask(">> username")),
-            ("platform", lambda: Prompt.ask(">> platform"))
+            ("description", lambda: Prompt.ask(">> description"))
         ]
 
         cur_loc = 0 # cursor location (index of the options list)
@@ -514,7 +494,7 @@ class App:
                 while True:
                     self.console.clear()
                     self.render_page_header("SEARCHED ENTRIES")
-                    self.console.print("[ESC] - back", style="info")
+                    self.console.print("[b]ack", style="info")
                     self.render_table(filtered_table,
                                     cur_loc=-1,
                                     page_size=page_size,
@@ -538,7 +518,7 @@ class App:
             self.console.clear()
 
 
-    def fetch_entries(self, page: int = None, page_size: int = None) -> pandas.DataFrame:
+    def fetch_entries(self) -> pandas.DataFrame:
         # fetch encrypted rows
         fetched_rows = self.db.get_entry(self.pass_table)
 
@@ -556,7 +536,7 @@ class App:
                 decrypted_fields.append(self.aes.decrypt(self.mp, row[i], row[i+3]).decode("utf-8"))
             
             # assign decrypted fields to corresponding column names
-            for column, value in zip(["ID", "USERNAME", "PASSWORD", "PLATFORM"], decrypted_fields):
+            for column, value in zip(["ID", "USERNAME", "PASSWORD", "DESCRIPTION"], decrypted_fields):
                 decrypted_rows.setdefault(column, []).append(value)
 
         return pandas.DataFrame(decrypted_rows)

@@ -44,9 +44,16 @@ A crappy but _hopefully_ safe terminal-based password manager!
 
 4. (Optional) Add the application to your system PATH
     #### Windows
-    ```sh
-    setx PATH "%PATH%;<file_location>"
-    ```
+    1. Search for "Edit environment variables for your account"
+    2. Click on the Environment Variables button
+    3. Select "Path" under the System variables section
+    4. Click on the "Edit" button
+    5. Click on the "New" button
+    6. Paste the absolute path for the pls.exe folder
+    7. Click on the "OK" button to apply the changes
+    8. Restart your terminal
+    
+    #### pls.exe is in \venv\Scripts\pls.exe
 
     #### Unix-like systems
     ```sh

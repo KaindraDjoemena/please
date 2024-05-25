@@ -5,7 +5,7 @@ from please.app import App
 
 def make_instance() -> App:
     app = App(
-        db_name="passwords.db",
+        db_name="please/passwords.db",
         pass_table="pass_table",
         mp_table="mp_table"
     )
@@ -13,7 +13,7 @@ def make_instance() -> App:
 
 
 def main():
-    if not os.path.exists("passwords.db"):
+    if not os.path.exists("please/passwords.db"):
         app = make_instance()
         app.user_signup()
         return
